@@ -18,9 +18,17 @@ package com.google.android.gms.samples.vision.face.facetracker;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.PointF;
+import android.util.DisplayMetrics;
+import android.util.Log;
+import android.view.Display;
 
 import com.google.android.gms.samples.vision.face.facetracker.ui.camera.GraphicOverlay;
 import com.google.android.gms.vision.face.Face;
+import com.google.android.gms.vision.face.Landmark;
+
+import java.text.DecimalFormat;
+import java.util.List;
 
 /**
  * Graphic instance for rendering face position, orientation, and landmarks within an associated
@@ -34,13 +42,13 @@ class FaceGraphic extends GraphicOverlay.Graphic {
     private static final float BOX_STROKE_WIDTH = 5.0f;
 
     private static final int COLOR_CHOICES[] = {
-        Color.BLUE,
-        Color.CYAN,
-        Color.GREEN,
-        Color.MAGENTA,
-        Color.RED,
-        Color.WHITE,
-        Color.YELLOW
+            Color.BLUE,
+            Color.CYAN,
+            Color.GREEN,
+            Color.MAGENTA,
+            Color.RED,
+            Color.WHITE,
+            Color.YELLOW
     };
     private static int mCurrentColorIndex = 0;
 
@@ -85,6 +93,7 @@ class FaceGraphic extends GraphicOverlay.Graphic {
         postInvalidate();
     }
 
+
     /**
      * Draws the face annotations for position on the supplied canvas.
      */
@@ -95,6 +104,25 @@ class FaceGraphic extends GraphicOverlay.Graphic {
             return;
         }
 
+
+
+//        for (Landmark landmark : face.getLandmarks()) {
+//            PointF position = landmark.getPosition();
+//
+//            float xProp = (position.x - face.getPosition().x) / face.getWidth();
+//            float yProp = (position.y - face.getPosition().y) / face.getHeight();
+//            canvas.drawCircle(xProp, yProp, 10, mBoxPaint);
+//
+//        }
+
+        for (Landmark landmark : face.getLandmarks()) {
+            int cx = (int) (landmark.getPosition().x * face.getWidth() / 2.0f);
+            int cy = (int) (landmark.getPosition().y * face.getHeight() / 2.0f);
+            canvas.drawCircle(cx, cy, 10, mBoxPaint);
+
+        }
+
+
         // Draws a circle at the position of the detected face, with the face's track id below.
         float x = translateX(face.getPosition().x + face.getWidth() / 2);
         float y = translateY(face.getPosition().y + face.getHeight() / 2);
@@ -102,7 +130,8 @@ class FaceGraphic extends GraphicOverlay.Graphic {
         canvas.drawText("id: " + mFaceId, x + ID_X_OFFSET, y + ID_Y_OFFSET, mIdPaint);
         canvas.drawText("happiness: " + String.format("%.2f", face.getIsSmilingProbability()), x - ID_X_OFFSET, y - ID_Y_OFFSET, mIdPaint);
         canvas.drawText("right eye: " + String.format("%.2f", face.getIsRightEyeOpenProbability()), x + ID_X_OFFSET * 2, y + ID_Y_OFFSET * 2, mIdPaint);
-        canvas.drawText("left eye: " + String.format("%.2f", face.getIsLeftEyeOpenProbability()), x - ID_X_OFFSET*2, y - ID_Y_OFFSET*2, mIdPaint);
+        canvas.drawText("left eye: " + String.format("%.2f", face.getIsLeftEyeOpenProbability()), x - ID_X_OFFSET * 2, y - ID_Y_OFFSET * 2, mIdPaint);
+
 
         // Draws a bounding box around the face.
         float xOffset = scaleX(face.getWidth() / 2.0f);
@@ -111,6 +140,96 @@ class FaceGraphic extends GraphicOverlay.Graphic {
         float top = y - yOffset;
         float right = x + xOffset;
         float bottom = y + yOffset;
+
+
+        float lineX = bottom;
+        float linexD = canvas.getHeight();
+        float lineHeight = lineX - linexD;
+        float lineHalf = lineHeight / 2;
+        float pxToM = lineHeight * 1000;
         canvas.drawRect(left, top, right, bottom, mBoxPaint);
+
+        // canvas.drawLine(right,bottom,canvas.getWidth() - left ,canvas.getHeight(),mBoxPaint);
+//        canvas.drawLine(right, bottom, lineX, canvas.getHeight() + lineHalf, mBoxPaint);
+//        canvas.drawLine(lineX, canvas.getHeight() + lineHalf, canvas.getWidth() - left, canvas.getHeight(), mBoxPaint);
+
+
+
+
+        //canvas.drawText(calculateDistancePolynomial(face.getWidth()), canvas.getWidth() / 2, canvas.getHeight() / 3, mIdPaint);
+       // canvas.drawText(calculateDistanceLinear(face.getWidth()), canvas.getWidth() / 2, canvas.getHeight() / 3 * 2, mIdPaint);
+        canvas.drawText(calculateDistancePower(face.getWidth()), canvas.getWidth() / 2, canvas.getHeight()/ 3 * 1 ,mIdPaint);
+
+
+        //canvas.drawText(Float.toString(face.getWidth()) , lineX - 300, canvas.getHeight() + lineHalf, mIdPaint);
+        // canvas.drawRect(0, canvas.getHeight(), right , bottom, mBoxPaint);
     }
+
+
+    public String calculateDistanceLinear(float x){
+        double result =  -1.385*x + 278.02;
+        DecimalFormat df = new DecimalFormat("#.00");
+        String resultString = df.format(result);
+        resultString += " cm";
+        if(result > 100) {
+            double resultToM = result / 100;
+            String resultToMString = df.format(resultToM);
+            resultToMString += " m";
+            return resultToMString;
+        }
+
+        return resultString;
+    }
+
+
+    public String calculateDistancePolynomial(float x){
+//       y = 0.0119x2 - 3.8881x + 369.8
+
+        double result ;
+        double E  = 3.8881 * x;
+        double d  =   0.0119 * x;
+        double resD = Math.pow(d, 2);
+        result = resD - E + 369.8;
+
+
+        DecimalFormat df = new DecimalFormat("#.00");
+        String resultString = df.format(result);
+        resultString += " cm";
+        if(result > 100) {
+            double resultToM = result / 100;
+            String resultToMString = df.format(resultToM);
+            resultToMString += " m";
+            return resultToMString;
+        }
+        return resultString;
+    }
+
+    public String calculateDistancePower(float x){
+
+        double result;
+        double E  = -110.4;
+        double resD = Math.log(x);
+        double f =  620.7;
+        result = E * resD + f;
+
+
+
+        DecimalFormat df = new DecimalFormat("#.00");
+        String resultString = df.format(result);
+        resultString += " cm";
+        if(result > 100) {
+            double resultToM = result / 100;
+            String resultToMString = df.format(resultToM);
+            resultToMString += " m";
+            return resultToMString;
+        }
+        return resultString;
+    }
+
+
+
+
+
+
 }
+
