@@ -8,7 +8,16 @@ public class Dijkstra {
 
 
     public static void main(String[] args) {
+    loadMatrix();
+    outputMatrix();
 
+
+
+
+    }
+
+
+    private static void loadMatrix(){
         for (int row=0; row < adjacencyMatrix.length; row++)
         {
             for (int col=0; col < adjacencyMatrix[row].length; col++)
@@ -17,8 +26,10 @@ public class Dijkstra {
 
             }
         }
+    }
 
 
+    private static void outputMatrix(){
         for (int row=0; row < adjacencyMatrix.length; row++)
         {
             System.out.print(System.lineSeparator());
