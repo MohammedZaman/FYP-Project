@@ -23,6 +23,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.Vibrator;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -31,6 +32,8 @@ import android.view.View;
 
 
 import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.samples.vision.face.facetracker.Accessibility.WarningSystemTTS;
+import com.google.android.gms.samples.vision.face.facetracker.Maths.SpeedOfObstacle;
 import com.google.android.gms.vision.CameraSource;
 import com.google.android.gms.vision.MultiProcessor;
 import com.google.android.gms.vision.Tracker;
@@ -58,6 +61,12 @@ public final class FaceTrackerActivity extends AppCompatActivity {
     // permission request codes need to be < 256
     private static final int RC_HANDLE_CAMERA_PERM = 2;
 
+    private int CurrentFaceID = -1;
+    //   private DataFromExcel  data = new DataFromExcel();
+    private SpeedOfObstacle speed = new SpeedOfObstacle();
+    WarningSystemTTS tts;
+
+
     //==============================================================================================
     // Activity Methods
     //==============================================================================================
@@ -72,7 +81,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
 
         mPreview = (CameraSourcePreview) findViewById(R.id.preview);
         mGraphicOverlay = (GraphicOverlay) findViewById(R.id.faceOverlay);
-
+        tts  = new WarningSystemTTS(this);
         // Check for the camera permission before accessing the camera.  If the
         // permission is not granted yet, request permission.
         int rc = ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA);
@@ -294,6 +303,11 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         @Override
         public void onNewItem(int faceId, Face item) {
             mFaceGraphic.setId(faceId);
+            tts.resetWarnings();
+            CurrentFaceID = item.getId();
+            Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+            v.vibrate(200);
+            tts.Warning(item.getWidth());
         }
 
         /**
@@ -303,6 +317,15 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         public void onUpdate(FaceDetector.Detections<Face> detectionResults, Face face) {
             mOverlay.add(mFaceGraphic);
             mFaceGraphic.updateFace(face);
+            tts.WarningDistance(face.getWidth());
+            double sp = speed.getSpeed(face.getWidth());
+            if(sp != -1.0) {
+                System.out.println(speed.getSpeed(face.getWidth()));
+
+            }
+            // vibrate if new face detected
+
+
         }
 
         /**
