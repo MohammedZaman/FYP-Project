@@ -216,7 +216,6 @@ public class Dijkstra {
         }
         return lines.size();
     }
-
     public static int[] toIntArray(String line[]){
         Size = line.length;
         int[] num = new int[line.length];
