@@ -6,7 +6,7 @@ import org.apache.commons.math3.stat.regression.OLSMultipleLinearRegression;
 
 import java.util.Arrays;
 
-public abstract class OLSTrendLine {
+public abstract class OLSTrendLine implements TrendLine {
     RealMatrix coef = null; // will hold prediction coefs once we get values
 
     protected abstract double[] xVector(double x); // create vector of values from x

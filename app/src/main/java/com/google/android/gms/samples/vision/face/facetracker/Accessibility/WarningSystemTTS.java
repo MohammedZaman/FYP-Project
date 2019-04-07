@@ -20,7 +20,7 @@ public class WarningSystemTTS {
     private int warning4 = 0;
 
 
-    public WarningSystemTTS (Context contextA){
+    public WarningSystemTTS (Context contextA, final String speachInit){
         mDistEst = new DistanceEstimation();
           v  = (Vibrator) contextA.getSystemService(contextA.VIBRATOR_SERVICE);
         this.tts = new TextToSpeech(contextA , new TextToSpeech.OnInitListener() {
@@ -30,6 +30,9 @@ public class WarningSystemTTS {
                     tts.setLanguage(Locale.UK);
                     tts.setPitch(1.3f);
                     tts.setSpeechRate(1f);
+                    if(speachInit != "") {
+                        tts.speak(speachInit, TextToSpeech.QUEUE_FLUSH, null);
+                    }
                 }
 
             }
@@ -92,6 +95,14 @@ public class WarningSystemTTS {
         this.warning3 = 0;
         this.warning4 = 0;
 
+
+    }
+
+    public void speak(String speach){
+        tts.setLanguage(Locale.UK);
+        tts.setPitch(1.3f);
+        tts.setSpeechRate(1f);
+        tts.speak(speach, TextToSpeech.QUEUE_FLUSH, null);
 
     }
 

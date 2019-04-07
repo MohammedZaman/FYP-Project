@@ -23,6 +23,7 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Display;
 
+import com.google.android.gms.samples.vision.face.facetracker.Maths.DistanceEstimation;
 import com.google.android.gms.samples.vision.face.facetracker.ui.camera.GraphicOverlay;
 import com.google.android.gms.vision.face.Face;
 import com.google.android.gms.vision.face.Landmark;
@@ -149,20 +150,10 @@ class FaceGraphic extends GraphicOverlay.Graphic {
         float pxToM = lineHeight * 1000;
         canvas.drawRect(left, top, right, bottom, mBoxPaint);
 
-        // canvas.drawLine(right,bottom,canvas.getWidth() - left ,canvas.getHeight(),mBoxPaint);
-//        canvas.drawLine(right, bottom, lineX, canvas.getHeight() + lineHalf, mBoxPaint);
-//        canvas.drawLine(lineX, canvas.getHeight() + lineHalf, canvas.getWidth() - left, canvas.getHeight(), mBoxPaint);
 
+        DistanceEstimation dis = new DistanceEstimation();
+        canvas.drawText(dis.calculateDistanceLogRegres(face.getWidth()) , lineX - 300, canvas.getHeight() + lineHalf, mIdPaint);
 
-
-
-        //canvas.drawText(calculateDistancePolynomial(face.getWidth()), canvas.getWidth() / 2, canvas.getHeight() / 3, mIdPaint);
-       // canvas.drawText(calculateDistanceLinear(face.getWidth()), canvas.getWidth() / 2, canvas.getHeight() / 3 * 2, mIdPaint);
-        canvas.drawText(calculateDistancePower(face.getWidth()), canvas.getWidth() / 2, canvas.getHeight()/ 3 * 1 ,mIdPaint);
-
-
-        //canvas.drawText(Float.toString(face.getWidth()) , lineX - 300, canvas.getHeight() + lineHalf, mIdPaint);
-        // canvas.drawRect(0, canvas.getHeight(), right , bottom, mBoxPaint);
     }
 
 

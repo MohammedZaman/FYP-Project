@@ -290,11 +290,6 @@ public class Dijkstra {
 
             // Mark the picked vertex as processed
             isVisited[u] = true;
-            if(u == dest){
-                break;
-
-
-            }
 
 
 
@@ -369,8 +364,6 @@ public class Dijkstra {
             isVisited[u] = true;
             if(u == dest){
                 break;
-
-
             }
 
 

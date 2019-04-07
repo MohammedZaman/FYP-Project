@@ -154,4 +154,70 @@ public class DistanceEstimation {
         return  String.valueOf(result);
     }
 
+    public String calculateDistanceLogRegres(float x){
+
+        TrendLine t = new LogTrendLine();
+      double[] Xaxis = new double[22];
+      double[] Yaxis = new double[22];
+
+
+        Yaxis[0] =  360;
+        Yaxis[1] = 300;
+        Yaxis[2] = 250;
+        Yaxis[3] = 230;
+        Yaxis[4] =  200;
+        Yaxis[5] = 170;
+        Yaxis[6] = 140;
+        Yaxis[7] = 120;
+        Yaxis[8] = 110;
+        Yaxis[9] =  100;
+        Yaxis[10] = 90;
+        Yaxis[11] = 85;
+        Yaxis[12] = 80;
+        Yaxis[13] = 70;
+        Yaxis[14] =  65;
+        Yaxis[15] = 60;
+        Yaxis[16] = 60;
+        Yaxis[17] = 57;
+        Yaxis[18] = 55;
+        Yaxis[19] = 50;
+        Yaxis[20] = 50;
+        Yaxis[21] = 50;
+
+        Xaxis[0] =  10;
+        Xaxis[1] = 20;
+        Xaxis[2] = 30;
+        Xaxis[3] = 40;
+        Xaxis[4] =  50;
+        Xaxis[5] = 60;
+        Xaxis[6] = 70;
+        Xaxis[7] = 80;
+        Xaxis[8] = 90;
+        Xaxis[9] =  100;
+        Xaxis[10] = 110;
+        Xaxis[11] = 120;
+        Xaxis[12] = 130;
+        Xaxis[13] = 140;
+        Xaxis[14] =  150;
+        Xaxis[15] = 160;
+        Xaxis[16] = 170;
+        Xaxis[17] = 180;
+        Xaxis[18] = 190;
+        Xaxis[19] = 200;
+        Xaxis[20] = 210;
+        Xaxis[21] = 220;
+
+
+
+
+
+        t.setValues(Yaxis,Xaxis);
+
+
+
+
+
+        return  String.valueOf(t.predict(x));
+    }
+
 }
