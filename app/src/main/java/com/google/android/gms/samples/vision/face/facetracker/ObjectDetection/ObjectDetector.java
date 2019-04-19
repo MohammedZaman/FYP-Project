@@ -1,3 +1,10 @@
+/**
+ * This class is used to obtain the image which will
+ * be sent to the Google Auto ML REST API.
+ *
+ * The class uses inherits from the Detector class
+ * which is form the Face API.
+ */
 package com.google.android.gms.samples.vision.face.facetracker.ObjectDetection;
 
 import android.graphics.Bitmap;
@@ -5,23 +12,24 @@ import android.graphics.BitmapFactory;
 import android.graphics.ImageFormat;
 import android.graphics.Rect;
 import android.graphics.YuvImage;
-import android.util.Log;
 import android.util.SparseArray;
-
 import com.google.android.gms.vision.Detector;
 import com.google.android.gms.vision.Frame;
 import com.google.android.gms.vision.face.Face;
-
 import java.io.ByteArrayOutputStream;
+
 
 public class ObjectDetector extends Detector<Face> {
     private Detector<Face> mDelegate;
+    private int i = 0;
+    private Network network;
 
-    int i = 0;
-    Network network = Network.getInstance();
+
     public ObjectDetector(Detector<Face> delegate) {
         mDelegate = delegate;
+        network = Network.getInstance();
     }
+
 
     public SparseArray<Face> detect(Frame frame) {
         i++;

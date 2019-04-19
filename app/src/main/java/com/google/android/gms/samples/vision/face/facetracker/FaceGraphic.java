@@ -18,18 +18,11 @@ package com.google.android.gms.samples.vision.face.facetracker;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.PointF;
-import android.util.DisplayMetrics;
-import android.util.Log;
-import android.view.Display;
 
-import com.google.android.gms.samples.vision.face.facetracker.Maths.DistanceEstimation;
+import com.google.android.gms.samples.vision.face.facetracker.DistanceEstimation.DistanceEstimation;
 import com.google.android.gms.samples.vision.face.facetracker.ui.camera.GraphicOverlay;
 import com.google.android.gms.vision.face.Face;
 import com.google.android.gms.vision.face.Landmark;
-
-import java.text.DecimalFormat;
-import java.util.List;
 
 /**
  * Graphic instance for rendering face position, orientation, and landmarks within an associated
@@ -63,6 +56,7 @@ class FaceGraphic extends GraphicOverlay.Graphic {
 
     FaceGraphic(GraphicOverlay overlay) {
         super(overlay);
+
 
         mCurrentColorIndex = (mCurrentColorIndex + 1) % COLOR_CHOICES.length;
         final int selectedColor = COLOR_CHOICES[mCurrentColorIndex];
@@ -152,70 +146,10 @@ class FaceGraphic extends GraphicOverlay.Graphic {
 
 
         DistanceEstimation dis = new DistanceEstimation();
-        canvas.drawText(dis.calculateDistanceLogRegres(face.getWidth()) , lineX - 300, canvas.getHeight() + lineHalf, mIdPaint);
+        canvas.drawText(dis.calculateDistancelogDataSet3(face.getWidth()) , canvas.getWidth() / 2, canvas.getHeight() + lineHalf, mIdPaint);
 
     }
 
-
-    public String calculateDistanceLinear(float x){
-        double result =  -1.385*x + 278.02;
-        DecimalFormat df = new DecimalFormat("#.00");
-        String resultString = df.format(result);
-        resultString += " cm";
-        if(result > 100) {
-            double resultToM = result / 100;
-            String resultToMString = df.format(resultToM);
-            resultToMString += " m";
-            return resultToMString;
-        }
-
-        return resultString;
-    }
-
-
-    public String calculateDistancePolynomial(float x){
-//       y = 0.0119x2 - 3.8881x + 369.8
-
-        double result ;
-        double E  = 3.8881 * x;
-        double d  =   0.0119 * x;
-        double resD = Math.pow(d, 2);
-        result = resD - E + 369.8;
-
-
-        DecimalFormat df = new DecimalFormat("#.00");
-        String resultString = df.format(result);
-        resultString += " cm";
-        if(result > 100) {
-            double resultToM = result / 100;
-            String resultToMString = df.format(resultToM);
-            resultToMString += " m";
-            return resultToMString;
-        }
-        return resultString;
-    }
-
-    public String calculateDistancePower(float x){
-
-        double result;
-        double E  = -110.4;
-        double resD = Math.log(x);
-        double f =  620.7;
-        result = E * resD + f;
-
-
-
-        DecimalFormat df = new DecimalFormat("#.00");
-        String resultString = df.format(result);
-        resultString += " cm";
-        if(result > 100) {
-            double resultToM = result / 100;
-            String resultToMString = df.format(resultToM);
-            resultToMString += " m";
-            return resultToMString;
-        }
-        return resultString;
-    }
 
 
 

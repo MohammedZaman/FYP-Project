@@ -5,33 +5,30 @@ import android.content.Context;
 import android.os.Vibrator;
 import android.speech.tts.TextToSpeech;
 
-import com.google.android.gms.samples.vision.face.facetracker.Maths.DistanceEstimation;
+import com.google.android.gms.samples.vision.face.facetracker.DistanceEstimation.DistanceEstimation;
 
 import java.util.Locale;
 
 public class WarningSystemTTS {
 
-    private TextToSpeech tts;
+    private TextToSpeech mTTS;
     private DistanceEstimation mDistEst;
-    private Vibrator v;
+    private Vibrator vibrator;
     private int warning1 = 0;
-    private int warning2 = 0;
-    private int warning3 = 0;
-    private int warning4 = 0;
 
 
-    public WarningSystemTTS (Context contextA, final String speachInit){
+    public WarningSystemTTS (Context contextA, final String speechInit){
         mDistEst = new DistanceEstimation();
-          v  = (Vibrator) contextA.getSystemService(contextA.VIBRATOR_SERVICE);
-        this.tts = new TextToSpeech(contextA , new TextToSpeech.OnInitListener() {
+          vibrator = (Vibrator) contextA.getSystemService(contextA.VIBRATOR_SERVICE);
+        this.mTTS = new TextToSpeech(contextA , new TextToSpeech.OnInitListener() {
             @Override
             public void onInit(int status) {
                 if(status != TextToSpeech.ERROR) {
-                    tts.setLanguage(Locale.UK);
-                    tts.setPitch(1.3f);
-                    tts.setSpeechRate(1f);
-                    if(speachInit != "") {
-                        tts.speak(speachInit, TextToSpeech.QUEUE_FLUSH, null);
+                    mTTS.setLanguage(Locale.UK);
+                    mTTS.setPitch(1.3f);
+                    mTTS.setSpeechRate(1f);
+                    if(speechInit != "") {
+                        mTTS.speak(speechInit, TextToSpeech.QUEUE_FLUSH, null);
                     }
                 }
 
@@ -43,67 +40,46 @@ public class WarningSystemTTS {
     }
 
     public synchronized void WarningDistance(float x){
-        double distance = Double.parseDouble(mDistEst.calculateDistancelogDataSet3Raw(x));
+        double distance = Double.parseDouble(mDistEst.calculateDistanceLogRegres(x).replaceAll("\\D+",""));
         if(distance >= 0 && distance  <=  50.0) {
-        tts.setLanguage(Locale.UK);
-        tts.setPitch(1.3f);
-        tts.setSpeechRate(1f);
+        mTTS.setLanguage(Locale.UK);
+        mTTS.setPitch(1.3f);
+        mTTS.setSpeechRate(1f);
         if(warning1 != 1) {
-            v.vibrate(500);
+            vibrator.vibrate(1000);
             warning1 ++;
         }
-        }else if(distance >= 50.0 && distance  <=  100.0) {
-            tts.setLanguage(Locale.UK);
-            tts.setPitch(1.3f);
-            tts.setSpeechRate(1f);
-            if(warning2 != 1) {
-                v.vibrate(300);
-                warning2++;
-            }
-        }else if(distance >= 100.0 && distance  <=  150.0) {
-            tts.setLanguage(Locale.UK);
-            tts.setPitch(1.3f);
-            tts.setSpeechRate(1f);
-            if(warning3 != 1) {
-                v.vibrate(200);
-                warning3++;
-            }
-        }else if(distance >= 150.0 && distance  <=  200.0) {
-        tts.setLanguage(Locale.UK);
-        tts.setPitch(1.3f);
-        tts.setSpeechRate(1f);
-        if(warning4 != 1) {
-            v.vibrate(100);
-            warning4++;
         }
-    }
-
 
     }
 
     public void Warning(float x){
-            tts.setLanguage(Locale.UK);
-            tts.setPitch(1.3f);
-            tts.setSpeechRate(1f);
-            tts.speak("Person Detected at "+ mDistEst.calculateDistancelogDataSet3(x), TextToSpeech.QUEUE_FLUSH, null);
+            mTTS.setLanguage(Locale.UK);
+            mTTS.setPitch(1.3f);
+            mTTS.setSpeechRate(1f);
+            mTTS.speak("Person Detected " + mDistEst.calculateDistanceLogRegres(x), TextToSpeech.QUEUE_FLUSH, null);
 
     }
 
     public void resetWarnings(){
         this.warning1 = 0;
-        this.warning2 = 0;
-        this.warning3 = 0;
-        this.warning4 = 0;
-
 
     }
 
-    public void speak(String speach){
-        tts.setLanguage(Locale.UK);
-        tts.setPitch(1.3f);
-        tts.setSpeechRate(1f);
-        tts.speak(speach, TextToSpeech.QUEUE_FLUSH, null);
+    public void speak(String speech){
+        mTTS.setLanguage(Locale.UK);
+        mTTS.setPitch(1.3f);
+        mTTS.setSpeechRate(1f);
+        mTTS.speak(speech, TextToSpeech.QUEUE_FLUSH, null);
 
+    }
+
+    public void stop(){
+        mTTS.shutdown();
+    }
+
+    public void pause(){
+       mTTS.stop();
     }
 
 }

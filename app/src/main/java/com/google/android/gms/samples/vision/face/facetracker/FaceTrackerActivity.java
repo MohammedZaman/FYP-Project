@@ -16,6 +16,7 @@
 package com.google.android.gms.samples.vision.face.facetracker;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -29,11 +30,13 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.widget.LinearLayout;
+import android.widget.Toast;
 
 
 import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.samples.vision.face.facetracker.Accessibility.OnSwipeTouchListener;
 import com.google.android.gms.samples.vision.face.facetracker.Accessibility.WarningSystemTTS;
-import com.google.android.gms.samples.vision.face.facetracker.Maths.SpeedOfObstacle;
 import com.google.android.gms.samples.vision.face.facetracker.ObjectDetection.ObjectDetector;
 import com.google.android.gms.vision.CameraSource;
 import com.google.android.gms.vision.MultiProcessor;
@@ -63,9 +66,8 @@ public final class FaceTrackerActivity extends AppCompatActivity {
     private static final int RC_HANDLE_CAMERA_PERM = 2;
 
     private int CurrentFaceID = -1;
-    //   private DataFromExcel  data = new DataFromExcel();
-    private SpeedOfObstacle speed = new SpeedOfObstacle();
     WarningSystemTTS tts;
+    private LinearLayout topLayout;
 
 
     //==============================================================================================
@@ -75,15 +77,37 @@ public final class FaceTrackerActivity extends AppCompatActivity {
     /**
      * Initializes the UI and initiates the creation of a face detector.
      */
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
         setContentView(R.layout.main);
-
+        topLayout = (LinearLayout) findViewById(R.id.topLayout);
         mPreview = (CameraSourcePreview) findViewById(R.id.preview);
         mGraphicOverlay = (GraphicOverlay) findViewById(R.id.faceOverlay);
-        tts  = new WarningSystemTTS(this,"Navigation Started");
+        tts  = new WarningSystemTTS(this,"Navigation Started, Swipe left to end navigation or swipe down for help");
+        Toast.makeText(FaceTrackerActivity.this, "Navigation Started, Swipe left to end navigation or swipe down for help", Toast.LENGTH_LONG).show();
 
+
+       topLayout.getRootView().setOnTouchListener(new OnSwipeTouchListener(this) {
+            public void onSwipeTop() {
+               // Toast.makeText(FaceTrackerActivity.this, "top", Toast.LENGTH_SHORT).show();
+            }
+            public void onSwipeRight() {
+                //Toast.makeText(FaceTrackerActivity.this, "right", Toast.LENGTH_SHORT).show();
+            }
+            public void onSwipeLeft() {
+                FaceTrackerActivity.super.onBackPressed();
+                tts.speak("Navigation Ended");
+                tts.stop();
+                Toast.makeText(FaceTrackerActivity.this, "Navigation Ended", Toast.LENGTH_SHORT).show();
+            }
+            public void onSwipeBottom() {
+               tts.speak("help, Swipe left to end navigation");
+                Toast.makeText(FaceTrackerActivity.this, "help, Swipe left to end navigation", Toast.LENGTH_SHORT).show();
+            }
+
+        });
         // Check for the camera permission before accessing the camera.  If the
         // permission is not granted yet, request permission.
         int rc = ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA);
@@ -144,14 +168,6 @@ public final class FaceTrackerActivity extends AppCompatActivity {
                         .build());
 
         if (!detector.isOperational()) {
-            // Note: The first time that an app using face API is installed on a device, GMS will
-            // download a native library to the device in order to do detection.  Usually this
-            // completes before the app is run for the first time.  But if that download has not yet
-            // completed, then the above call will not detect any faces.
-            //
-            // isOperational() can be used to check if the required native library is currently
-            // available.  The detector will automatically become operational once the library
-            // download completes on device.
             Log.w(TAG, "Face detector dependencies are not yet available.");
         }
 
@@ -272,6 +288,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
         }
     }
 
+
     //==============================================================================================
     // Graphic Face Tracker
     //==============================================================================================
@@ -321,12 +338,7 @@ public final class FaceTrackerActivity extends AppCompatActivity {
             mOverlay.add(mFaceGraphic);
             mFaceGraphic.updateFace(face);
             tts.WarningDistance(face.getWidth());
-            double sp = speed.getSpeed(face.getWidth());
-            if(sp != -1.0) {
-                System.out.println(speed.getSpeed(face.getWidth()));
 
-            }
-            // vibrate if new face detected
 
 
         }

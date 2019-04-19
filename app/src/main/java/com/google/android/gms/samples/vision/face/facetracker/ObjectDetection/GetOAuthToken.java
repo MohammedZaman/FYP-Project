@@ -29,10 +29,10 @@ import com.google.android.gms.samples.vision.face.facetracker.Navigation;
 import java.io.IOException;
 
 public class GetOAuthToken extends AsyncTask<Void, Void, Void> {
-    Activity mActivity;
-    Account mAccount;
-    int mRequestCode;
-    String mScope;
+    private Activity mActivity;
+    private Account mAccount;
+    private int mRequestCode;
+    private String mScope;
 
     public GetOAuthToken(Activity activity, Account account, String scope, int requestCode) {
         this.mActivity = activity;

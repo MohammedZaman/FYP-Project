@@ -34,11 +34,12 @@
         <activity
             android:name=".FaceTrackerActivity"
             android:label="Face Tracker"
-            android:screenOrientation="fullSensor"
+            android:screenOrientation="portrait"
             android:theme="@style/Theme.AppCompat.NoActionBar">
 
+
         </activity>
-        <activity android:name=".Navigation">
+        <activity android:name=".Navigation" android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

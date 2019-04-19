@@ -3,6 +3,7 @@ package com.google.android.gms.samples.vision.face.facetracker;
 import android.Manifest;
 import android.accounts.Account;
 import android.accounts.AccountManager;
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
@@ -18,12 +19,20 @@ import android.util.Log;
 import android.view.HapticFeedbackConstants;
 import android.view.View;
 import android.widget.Button;
+import android.widget.FrameLayout;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
+import android.widget.TableLayout;
+import android.widget.TableRow;
 import android.widget.Toast;
 
 import com.google.android.gms.auth.GoogleAuthUtil;
 import com.google.android.gms.common.AccountPicker;
+import com.google.android.gms.samples.vision.face.facetracker.Accessibility.OnSwipeTouchListener;
+import com.google.android.gms.samples.vision.face.facetracker.Accessibility.WarningSystemTTS;
 import com.google.android.gms.samples.vision.face.facetracker.ObjectDetection.GetOAuthToken;
 import com.google.android.gms.samples.vision.face.facetracker.ObjectDetection.Network;
+import com.google.android.gms.samples.vision.face.facetracker.ui.camera.GraphicOverlay;
 
 import java.util.Locale;
 
@@ -34,6 +43,8 @@ public class Navigation extends AppCompatActivity implements View.OnClickListene
     private Button bottomLeftBtn;
     private Button bottomRigthBtn;
 
+
+
     static final int REQUEST_CODE_PICK_ACCOUNT = 101;
     static final int REQUEST_ACCOUNT_AUTHORIZATION = 102;
     static final int REQUEST_PERMISSIONS = 13;
@@ -41,31 +52,24 @@ public class Navigation extends AppCompatActivity implements View.OnClickListene
     private Account mAccount;
 
     // text to speech
-    private TextToSpeech tts;
+    private WarningSystemTTS tts;
 
 
+    @SuppressLint("ClickableViewAccessibility")
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_navigation);
-        final String explain = "There are four Locations Available, click on the screen to get the location names. To start the navigation hold on the location";
+        final String explain = "There are four Locations Available, click on the screen to get the location names. To start the navigation hold on the location. for help swipe down";
         ActivityCompat.requestPermissions(Navigation.this,
                 new String[]{Manifest.permission.GET_ACCOUNTS},
                 REQUEST_PERMISSIONS);
-        // text to speech
-        this.tts = new TextToSpeech(this, new OnInitListener() {
-            @Override
-            public void onInit(int status) {
-                if(status != TextToSpeech.ERROR) {
-                    tts.setLanguage(Locale.UK);
-                    tts.setPitch(1.3f);
-                    tts.setSpeechRate(1f);
-                    tts.speak(explain, TextToSpeech.QUEUE_FLUSH, null);
-                }
 
-            }
-        });
+        tts  = new WarningSystemTTS(this,explain);
+
+
+
 
 
         // top row buttons
@@ -88,6 +92,10 @@ public class Navigation extends AppCompatActivity implements View.OnClickListene
         // long click event
         bottomRigthBtn.setOnLongClickListener(this);
 
+
+
+
+
     }
 
 
@@ -96,19 +104,20 @@ public class Navigation extends AppCompatActivity implements View.OnClickListene
         switch (v.getId()) {
             case R.id.optTlBtn:
                 v.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
-                speak("location 1");
+                tts.speak("location 1");
                 break;
             case R.id.optTrBtn:
                 v.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
-                speak("location 2");
+                tts.speak("location 2");
                 break;
             case R.id.optBlBtn:
                 v.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
-                speak("location 3");
+                tts.speak("location 3");
                 break;
             case R.id.optBrBtn:
                 v.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
-                speak("location 4");
+               tts.speak("location 4");
+
                 break;
             default:
                 break;
@@ -127,6 +136,7 @@ public class Navigation extends AppCompatActivity implements View.OnClickListene
             case R.id.optBrBtn:
                 Intent intent = new Intent(this, FaceTrackerActivity.class);
                 startActivity(intent);
+                tts.pause();
                 break;
             default:
                 break;
@@ -134,13 +144,6 @@ public class Navigation extends AppCompatActivity implements View.OnClickListene
         return false;
     }
 
-    private void speak(String speachText){
-        tts.setLanguage(Locale.UK);
-        tts.setPitch(1.3f);
-        tts.setSpeechRate(1f);
-        tts.speak(speachText, TextToSpeech.QUEUE_FLUSH, null);
-
-    }
 
 
     @Override

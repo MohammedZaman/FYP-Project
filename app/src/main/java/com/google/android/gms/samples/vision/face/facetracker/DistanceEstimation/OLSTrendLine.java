@@ -1,4 +1,4 @@
-package com.google.android.gms.samples.vision.face.facetracker.Maths;
+package com.google.android.gms.samples.vision.face.facetracker.DistanceEstimation;
 
 import org.apache.commons.math3.linear.MatrixUtils;
 import org.apache.commons.math3.linear.RealMatrix;

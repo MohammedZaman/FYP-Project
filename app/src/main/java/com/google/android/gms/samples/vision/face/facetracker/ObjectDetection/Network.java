@@ -1,3 +1,13 @@
+/**
+ * <h1>Network </h1>
+ *
+ * <p>This class is used to access the Google Auto ML Rest API,
+ * The the class requires the setUp Method to
+ * be called for the class to perform detection.</p>
+ *
+ * @author  Mohammed Zaman
+ *
+ */
 package com.google.android.gms.samples.vision.face.facetracker.ObjectDetection;
 
 import android.annotation.SuppressLint;
@@ -5,12 +15,11 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.util.Log;
-import android.widget.ScrollView;
-import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.samples.vision.face.facetracker.Accessibility.WarningSystemTTS;
+import com.google.android.gms.samples.vision.face.facetracker.FaceTrackerActivity;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
-import com.google.gson.Gson;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -30,22 +39,18 @@ public class Network {
     private static Network network = null;
     private OkHttpClient client;
     private Request request;
-    private String url;
     private WarningSystemTTS tts;
-
-    public String getToken() {
-        return token;
-    }
-
-
-
     private String token;
-
-
-    public static final MediaType JSON
+    private Context context;
+    private static final MediaType JSON
             = MediaType.parse("Content-Type: application/json");
 
 
+    /**
+     * This class is a singleton. The same instance can be accessed
+     * throughout the application.
+     * @return The network class is returned if it has already been initialized.
+     */
     public static Network getInstance()
     {
         if (network == null)
@@ -54,24 +59,43 @@ public class Network {
         return network;
     }
 
-
+    /**
+     * This Method sets up the class so that it can perform the detection.
+     * Also, the Text-to-speech class is initialized within this method.
+     *
+     * This method must be called or the detection will not function!
+     * @param token This is required, in order to access the rest API
+     * @param context  This parameter is the context of the activity in which the class is accessed from
+     */
     public void setUp(String token, Context context){
         tts = new WarningSystemTTS(context,"");
-      client   = new OkHttpClient();
-      this.token = token;
-      url ="https://automl.googleapis.com/v1beta1/projects/fyp-indoornav/locations/us-central1/models/ICN3638499721899927878:predict -d";
+        client   = new OkHttpClient();
+        this.context = context;
+        this.token = token;
      }
 
 
+    /**
+     * This method performs the request to the API.The image is encoded to base64 format
+     * and prepared into the format which is specified by the API.
+     *
+     * The response is unwrapped from the JSON format in which it arrives. The Data is taken
+     * out and validated, the score of the classification must be 0.8 to be outputted through
+     * the custom Text-to-speech class Called WarningSystemTTS.
+     *
+     * The classification is only outputted once the request has been made.
+     *
+     * @param bitmap An image in bitmap format must be provided to be classified
+     */
     @SuppressLint("StaticFieldLeak")
     public final void callDetection(final Bitmap bitmap) {
-
-
+        // AsyncTask used to ensure the specific code is executed after Post
         new AsyncTask<Object, Void, String>() {
             @Override
             protected String doInBackground(Object... params) {
                 try {
-
+                    // setting up Request
+                    // Image encoded to Base64 and put inside the JSONObject
                     JSONObject imgBytes= new JSONObject();
                     try {
 
@@ -79,30 +103,22 @@ public class Network {
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
-
+                    // Image to be sent tot he API
                     JSONObject img= new JSONObject();
                     try {
                         img.put("image" ,imgBytes );
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
-
-
+                    // payload with image JSON object Within it
                     JSONObject payloadx = new JSONObject();
                     try {
                         payloadx.put("payload",img);
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
-
-
-
-                    Gson gson = new Gson();
                     String json = payloadx.toString();
-
-
                     RequestBody body = RequestBody.create(JSON,json);
-
                     request = new Request.Builder()
                             .header("Authorization","Bearer " + token)
                             .url("https://automl.googleapis.com/v1beta1/projects/fyp-indoornav/locations/us-central1/models/ICN1183747073149982906:predict")
@@ -110,28 +126,32 @@ public class Network {
                             .build();
 
 
-                    Log.w("json",json);
 
 
+                    // Response
                     Response response = client.newCall(request).execute();
-
-
                     String resStr = response.body().string().toString();
-                    JSONObject responceJson  = null;
+                    JSONObject responseJson  = null;
                     try {
                         if(resStr != null) {
-                            responceJson = new JSONObject(resStr);
+                            responseJson = new JSONObject(resStr);
                         }
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
                     JSONArray payload;
-                    if(responceJson != null) {
-                        payload = new JSONArray(responceJson.get("payload").toString());
-                        JSONObject classification = payload.getJSONObject(0);
-                        responceJson = null;
-                        resStr = "";
-                        return classification.getString("displayName");
+                    if(responseJson != null) {
+                        payload = responseJson.getJSONArray("payload");
+                        if(payload != null) {
+                            JSONObject classification = payload.getJSONObject(0);
+                            double score = classification.getJSONObject("classification").getDouble("score");
+                            // Score can be adjusted, to suit the needs of the use case
+                            if (score <= 0.8) {
+                                return classification.getString("displayName").toString();
+                            } else {
+                                return null;
+                            }
+                        }
                     }else{
                         return null;
                     }
@@ -147,44 +167,26 @@ public class Network {
                 return null;
             }
 
-            protected void onPostExecute(String response) {
-                String x = null;
-                if(response != null) {
-                        Log.d("classify", response);
-                        tts.speak(response + " detected");
+            protected void onPostExecute(String objectName) {
+                if(objectName != null) {
+                        tts.speak(objectName + " detected");
+                    Toast.makeText(context, objectName + " Detected", Toast.LENGTH_LONG).show();
                 }
                    else{
                     Log.d("classify", "nothing Detected");
                 }
-
-
-
-
-
             }
 
         }.execute();
     }
 
-    class Payload {
 
-
-        public String getImageBase64() {
-            return imageBase64;
-        }
-
-        public void setImageBase64(String imageBase64) {
-            this.imageBase64 = imageBase64;
-        }
-
-        private String imageBase64;
-
-
-    }
-
-
-
-    public static String encodeTobase64(Bitmap image) {
+    /**
+     * This method is used to encode the bitmap image into Base64
+     * @param image the parameter must be in bitmap format
+     * @return This returns the encoded image as a string
+     */
+   private static String encodeTobase64(Bitmap image) {
         Bitmap immagex = image;
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         immagex.compress(Bitmap.CompressFormat.PNG, 100, baos);
@@ -194,73 +196,14 @@ public class Network {
     }
 
 
-    public String sendRequest(Payload image) throws IOException {
-
-
-
-
-//         JSONObject img= new JSONObject();
-//         try {
-//             img.put("imageBytes" , image.getImageBytes().toString());
-//         } catch (JSONException e) {
-//             e.printStackTrace();
-//         }
-
-         JSONObject imgBytes= new JSONObject();
-         try {
-
-             imgBytes.put("imageBytes",image.getImageBase64());
-         } catch (JSONException e) {
-             e.printStackTrace();
-         }
-
-         JSONObject img= new JSONObject();
-         try {
-             img.put("image" ,imgBytes );
-         } catch (JSONException e) {
-             e.printStackTrace();
-         }
-
-
-         JSONObject payload = new JSONObject();
-         try {
-             payload.put("payload",img);
-         } catch (JSONException e) {
-             e.printStackTrace();
-         }
-
-
-
-         Gson gson = new Gson();
-         String json = payload.toString();
-
-
-         RequestBody body = RequestBody.create(JSON,json);
-
-         request = new Request.Builder()
-                 .header("Authorization","Bearer " + token)
-                 .url("https://automl.googleapis.com/v1beta1/projects/fyp-indoornav/locations/us-central1/models/ICN3638499721899927878:predict")
-                 .post(body)
-                 .build();
-
-
-         Log.w("json",json);
-         Response response = client.newCall(request).execute();
-
-        String resStr = response.body().string().toString();
-        JSONObject jsonx  = null;
-        try {
-            jsonx = new JSONObject(resStr);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-
-
-        return jsonx.toString();
-     }
-
-
+    /**
+     * This getter is used to check if the token exist from external classes
+     *
+     * @return the token which this class is set up with is returned
+     */
+    public String getToken() {
+        return token;
+    }
 
 
 

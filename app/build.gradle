@@ -46,4 +46,8 @@ dependencies {
         exclude module: 'httpclient'
     }
 
+    // localization
+
+
+
 }

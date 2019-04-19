@@ -1,4 +1,4 @@
-package com.google.android.gms.samples.vision.face.facetracker.Maths;
+package com.google.android.gms.samples.vision.face.facetracker.DistanceEstimation;
 
 public class LogTrendLine extends OLSTrendLine {
     @Override
